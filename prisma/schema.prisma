@@ -17,17 +17,18 @@ enum TransactionType {
 }
 
 model User {
-  id           Int           @id @default(autoincrement())
-  telegramId   String        @unique
-  username     String?
-  firstName    String?
-  role         UserRole
-  isActive     Boolean       @default(true)
+  id         Int      @id @default(autoincrement())
+  telegramId String   @unique
+  username   String?
+  firstName  String?
+  role       UserRole
+  isActive   Boolean  @default(true)
 
   transactions Transaction[]
+  debts        Debt[]
 
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Transaction {
@@ -36,12 +37,37 @@ model Transaction {
   amount      Decimal         @db.Decimal(15, 2)
   description String
 
-  userId      Int
-  user        User            @relation(fields: [userId], references: [id])
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
 
-  createdAt   DateTime        @default(now())
+  debtId Int?
+  debt   Debt? @relation(fields: [debtId], references: [id])
+
+  createdAt DateTime @default(now())
 
   @@index([type])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([debtId])
+}
+
+model Debt {
+  id Int @id @default(autoincrement())
+
+  totalAmount Decimal @db.Decimal(15, 2)
+  paidAmount  Decimal @default(0) @db.Decimal(15, 2)
+  debtAmount  Decimal @db.Decimal(15, 2)
+
+  description String
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  transactions Transaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([userId])
   @@index([createdAt])
 }
